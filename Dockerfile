@@ -18,6 +18,6 @@ COPY --from=base /app/ /app/
 # Application files
 COPY src /app/src/
 
-ARG PORT=8888
+ARG PORT=8000
 ENV PORT ${PORT}
 CMD ["sh", "-c", "uvicorn src.app:app --host 0.0.0.0 --port $PORT"]

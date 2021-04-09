@@ -15,6 +15,10 @@ app = FastAPI(debug=DEBUG,
 def read_root():
     return {"status": "OK"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "Ok"}
+
 
 def start():
     uvicorn.run("app:app", host="0.0.0.0", port=PORT, log_level="info", reload=ENV == DEV)
