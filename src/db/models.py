@@ -57,6 +57,9 @@ class Label(Base):
 
 
 class LinkLabelAssociation(Base):
+    """Many to many relationship between links and labels to mark link with labels and use
+        those labels to filter links.
+    """
     __tablename__ = "links_labels_association"
 
     link_id = Column(Integer, ForeignKey("links.id"), primary_key=True)
@@ -81,13 +84,19 @@ class Board(Base):
 
 
 class UserFavoriteBoardsAssociation(Base):
+    """Many to many relationship between user and board to mark favorited boards
+        for users.
+    """
     __tablename__ = "users_favorite_boards_association"
 
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
 
 
-class BoardLabelsFilter(Base):
+class BoardLabelsFilterAssociation(Base):
+    """Many to many relationship between boards and labels that will be used
+        to filter links for board by the labels associated board.
+    """
     __tablename__ = "boards_labels_filters_association"
 
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
