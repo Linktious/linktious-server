@@ -18,7 +18,7 @@ class User(Base):
     created_boards = relationship("Board", back_populates="created_by", foreign_keys='Board.created_by_user_id')
     created_links = relationship("Link", back_populates="created_by")
     created_labels = relationship("Label", back_populates="created_by")
-    favorite_boards = relationship("Board", secondary="users_favorite_boards", back_populates="favorited_by")
+    favorite_boards = relationship("Board", secondary="users_favorite_boards_association", back_populates="favorited_by")
 
 
     def __repr__(self):
@@ -35,7 +35,7 @@ class Link(Base):
     created_by_user_id = Column(Integer, ForeignKey("users.id"))
 
     created_by = relationship("User", back_populates="created_links")
-    labels = relationship("Label", secondary="links_labels", back_populates="links")
+    labels = relationship("Label", secondary="links_labels_association", back_populates="links")
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, created by: {self.created_by.email}>"
@@ -49,15 +49,15 @@ class Label(Base):
     created_by_user_id = Column(Integer, ForeignKey("users.id"))
 
     created_by = relationship("User", back_populates="created_labels")
-    links = relationship("Link", secondary="links_labels", back_populates="labels")
-    boards_using_as_filter = relationship("Board", secondary="boards_labels_filters", back_populates="labels_filters")
+    links = relationship("Link", secondary="links_labels_association", back_populates="labels")
+    boards_using_as_filter = relationship("Board", secondary="boards_labels_filters_association", back_populates="labels_filters")
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"
 
 
-class LinkLabel(Base):
-    __tablename__ = "links_labels"
+class LinkLabelAssociation(Base):
+    __tablename__ = "links_labels_association"
 
     link_id = Column(Integer, ForeignKey("links.id"), primary_key=True)
     lable_id = Column(Integer, ForeignKey("labels.id"), primary_key=True)
@@ -73,22 +73,22 @@ class Board(Base):
     created_by_user_id = Column(Integer, ForeignKey("users.id"))
 
     created_by = relationship("User", back_populates="created_boards", foreign_keys=[created_by_user_id])
-    favorited_by = relationship("User", secondary="users_favorite_boards", back_populates="favorite_boards")
-    labels_filters = relationship("Label", secondary="boards_labels_filters", back_populates="boards_using_as_filter")
+    favorited_by = relationship("User", secondary="users_favorite_boards_association", back_populates="favorite_boards")
+    labels_filters = relationship("Label", secondary="boards_labels_filters_association", back_populates="boards_using_as_filter")
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"
 
 
-class UserFavoriteBoards(Base):
-    __tablename__ = "users_favorite_boards"
+class UserFavoriteBoardsAssociation(Base):
+    __tablename__ = "users_favorite_boards_association"
 
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
 
 
 class BoardLabelsFilter(Base):
-    __tablename__ = "boards_labels_filters"
+    __tablename__ = "boards_labels_filters_association"
 
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
     label_id = Column(Integer, ForeignKey("labels.id"), primary_key=True)
