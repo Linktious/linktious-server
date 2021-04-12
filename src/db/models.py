@@ -2,7 +2,7 @@ import datetime as dt
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from . import Base
+from .base import Base
 
 
 class User(Base):
@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    main_board_id = Column(Integer, ForeignKey("boards.id"), nullable=True)
+    main_board_id = Column(Integer, ForeignKey("boards.id", use_alter=True), nullable=True)
 
     main_board = relationship("Board", foreign_keys=[main_board_id])
     created_boards = relationship("Board", back_populates="created_by", foreign_keys='Board.created_by_user_id')
@@ -56,7 +56,7 @@ class Label(Base):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"
 
 
-class LinkLable(Base):
+class LinkLabel(Base):
     __tablename__ = "links_labels"
 
     link_id = Column(Integer, ForeignKey("links.id"), primary_key=True)
