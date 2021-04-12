@@ -1,6 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
+from .db import models, engine
 
+models.Base.metadata.create_all(bind=engine)
 
 DEBUG = True
 DEV = 'DEV'

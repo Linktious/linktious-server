@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# linktious sqlite
+linktious.db-journal
+linktious.db
