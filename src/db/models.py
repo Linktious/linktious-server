@@ -57,7 +57,7 @@ class Label(Base):
 
 
 class LinkLabelAssociation(Base):
-    """Many to many relationship between links and labels to mark link with labels and use
+    """Many to many relationship between links and labels to select labels for links and use
         those labels to filter links.
     """
     __tablename__ = "links_labels_association"
@@ -84,7 +84,7 @@ class Board(Base):
 
 
 class UserFavoriteBoardsAssociation(Base):
-    """Many to many relationship between user and board to mark favorited boards
+    """Many to many relationship between users and boards to select favorite boards
         for users.
     """
     __tablename__ = "users_favorite_boards_association"
@@ -95,7 +95,7 @@ class UserFavoriteBoardsAssociation(Base):
 
 class BoardLabelsFilterAssociation(Base):
     """Many to many relationship between boards and labels that will be used
-        to filter links for board by the labels associated board.
+        to filter links for board by the labels associated to board.
     """
     __tablename__ = "boards_labels_filters_association"
 
