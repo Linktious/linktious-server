@@ -1,5 +1,5 @@
 from db.base import *
-from db import models
+from db import models, schema
 
 models.Base.metadata.create_all(bind=engine)
 ses =  SessionLocal()
@@ -15,8 +15,10 @@ def generate_db():
             ses.refresh(obj)
         return objs
 
+    team1 = models.Team(name="Team Rocket")
+    add(team1)
 
-    user1 = models.User(email="user@email.com", hashed_password="12345678")
+    user1 = models.User(name="Asaf", email="user@email.com", hashed_password="12345678", team_id=team1.id)
     add(user1)
 
     link1 = models.Link(icon_url="www.icon1.com", url="http:url1.com", created_by_user_id=user1.id)
@@ -41,14 +43,17 @@ def generate_db():
     add(board1)
 
     user1.favorite_boards.append(board1)
-    user1.main_board = board1
+    user1.main_board_id = board1.id
 
     board1.labels_filters.append(label2)
+    ses.commit()
 
 generate_db()
 
+teams = ses.query(models.Team).all()
 users = ses.query(models.User).all()
 links = ses.query(models.Link).all()
 labels = ses.query(models.Label).all()
 boards = ses.query(models.Board).all()
-import ipdb; ipdb.set_trace()
+
+# ipython -i playground.py
