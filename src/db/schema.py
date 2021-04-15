@@ -13,16 +13,18 @@ class IdOnly(BaseModel):
 class TeamBase(BaseModel):
     name: str
 
+
+class TeamCreate(TeamBase):
+    
     class Config:
         orm_mode = True
 
 
-class TeamCreate(TeamBase):
-    pass
-
-
 class Team(TeamBase):
     id: int
+
+    class Config:
+        orm_mode = True
 
 
 class UserBase(BaseModel):
@@ -31,21 +33,27 @@ class UserBase(BaseModel):
     is_active: bool = True
     team_id: int = None
 
-    class Config:
-        orm_mode = True
-
 
 class UserCreate(UserBase):
     hashed_password: str
+
+    class Config:
+        orm_mode = True
 
 
 class UserBasicInfo(UserBase):
     id: int
 
+    class Config:
+        orm_mode = True
+
 
 class User(UserBasicInfo):
     main_board_id: int = None
     favorite_boards: List[IdOnly] = []
+
+    class Config:
+        orm_mode = True
 
 
 class LabelBase(BaseModel):
@@ -53,16 +61,18 @@ class LabelBase(BaseModel):
     created_at: dt.datetime
     created_by_user_id: int
 
+
+class LabelCreate(LabelBase):
+    
     class Config:
         orm_mode = True
 
 
-class LabelCreate(LabelBase):
-    pass
-
-
 class Label(LabelBase):
     id: int
+
+    class Config:
+        orm_mode = True
 
 
 class LinkBase(BaseModel):
@@ -70,18 +80,20 @@ class LinkBase(BaseModel):
     url: str
     created_at: dt.datetime
     created_by_user_id: int
-    labels: List[IdOnly] = []
 
+
+class LinkCreate(LinkBase):
+    
     class Config:
         orm_mode = True
 
 
-class LinkCreate(LinkBase):
-    pass
-
-
 class Link(LinkBase):
     id: int
+    labels: List[IdOnly] = []
+
+    class Config:
+        orm_mode = True
 
 
 class BoardBase(BaseModel):
@@ -90,15 +102,17 @@ class BoardBase(BaseModel):
     created_at: dt.datetime
     updated_at: dt.datetime
     created_by_user_id: int
-    labels_filters: List[IdOnly] = []
 
+
+class BoardCreate(BoardBase):
+    
     class Config:
         orm_mode = True
 
 
-class BoardCreate(BoardBase):
-    pass
-
-
 class Board(BoardBase):
     id: int
+    labels_filters: List[IdOnly] = []
+
+    class Config:
+        orm_mode = True

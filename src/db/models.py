@@ -25,11 +25,13 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
-    main_board_id = Column(Integer, ForeignKey("boards.id", use_alter=True), nullable=True)
 
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
     team = relationship("Team", back_populates="users")
+
+    main_board_id = Column(Integer, ForeignKey("boards.id", use_alter=True), nullable=True)
     main_board = relationship("Board", foreign_keys=[main_board_id])
+    
     created_boards = relationship("Board", back_populates="created_by", foreign_keys='Board.created_by_user_id')
     created_links = relationship("Link", back_populates="created_by")
     created_labels = relationship("Label", back_populates="created_by")

@@ -48,7 +48,7 @@ def generate_db():
     board1.labels_filters.append(label2)
     ses.commit()
 
-generate_db()
+# generate_db()
 
 teams = ses.query(models.Team).all()
 users = ses.query(models.User).all()
