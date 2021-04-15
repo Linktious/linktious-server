@@ -1,13 +1,6 @@
 from typing import Optional, List, Union
 import datetime as dt
-from pydantic import BaseModel
-
-
-class IdOnly(BaseModel):
-    id: int
-
-    class Config:
-        orm_mode = True 
+from pydantic import BaseModel, validator, HttpUrl, EmailStr
 
 
 class TeamBase(BaseModel):
@@ -29,7 +22,7 @@ class Team(TeamBase):
 
 class UserBase(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     is_active: bool = True
     team_id: int = None
 
@@ -50,7 +43,11 @@ class UserBasicInfo(UserBase):
 
 class User(UserBasicInfo):
     main_board_id: int = None
-    favorite_boards: List[IdOnly] = []
+    favorite_boards: List[int] = []
+
+    @validator("favorite_boards", pre=True)
+    def favorite_boards_ids(cls, favorite_boards):
+        return (board.id for board in favorite_boards)
 
     class Config:
         orm_mode = True
@@ -76,8 +73,8 @@ class Label(LabelBase):
 
 
 class LinkBase(BaseModel):
-    icon_url: str
-    url: str
+    icon_url: HttpUrl
+    url: HttpUrl
     created_at: dt.datetime
     created_by_user_id: int
 
@@ -90,7 +87,12 @@ class LinkCreate(LinkBase):
 
 class Link(LinkBase):
     id: int
-    labels: List[IdOnly] = []
+    labels: List[int] = []
+
+    
+    @validator("labels", pre=True)
+    def labels_ids(cls, labels):
+        return (label.id for label in labels)
 
     class Config:
         orm_mode = True
@@ -112,7 +114,11 @@ class BoardCreate(BoardBase):
 
 class Board(BoardBase):
     id: int
-    labels_filters: List[IdOnly] = []
+    labels_filters: List[int] = []
+
+    @validator("labels_filters", pre=True)
+    def labels_ids(cls, labels):
+        return (label.id for label in labels)
 
     class Config:
         orm_mode = True

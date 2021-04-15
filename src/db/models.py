@@ -9,7 +9,7 @@ class Team(Base):
     __tablename__ = "teams"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String, unique=True, index=True)
 
     users = relationship("User", back_populates="team")
 
@@ -52,7 +52,7 @@ class Link(Base):
 
     created_by_user_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User", back_populates="created_links")
-    
+
     labels = relationship("Label", secondary="links_labels_association", back_populates="links")
 
     def __repr__(self):
