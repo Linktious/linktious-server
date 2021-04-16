@@ -5,16 +5,33 @@ from sqlalchemy.orm import relationship
 from .base import Base
 
 
+class Team(Base):
+    __tablename__ = "teams"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    users = relationship("User", back_populates="team")
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} id: {self.id} name: {self.name}>"
+
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    main_board_id = Column(Integer, ForeignKey("boards.id", use_alter=True), nullable=True)
 
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    team = relationship("Team", back_populates="users")
+
+    main_board_id = Column(Integer, ForeignKey("boards.id", use_alter=True), nullable=True)
     main_board = relationship("Board", foreign_keys=[main_board_id])
+
     created_boards = relationship("Board", back_populates="created_by", foreign_keys='Board.created_by_user_id')
     created_links = relationship("Link", back_populates="created_by")
     created_labels = relationship("Label", back_populates="created_by")
@@ -32,9 +49,10 @@ class Link(Base):
     icon_url = Column(String)
     url = Column(String)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"))
 
+    created_by_user_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User", back_populates="created_links")
+
     labels = relationship("Label", secondary="links_labels_association", back_populates="links")
 
     def __repr__(self):
@@ -46,9 +64,10 @@ class Label(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"))
 
+    created_by_user_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User", back_populates="created_labels")
+
     links = relationship("Link", secondary="links_labels_association", back_populates="labels")
     boards_using_as_filter = relationship("Board", secondary="boards_labels_filters_association", back_populates="labels_filters")
 
@@ -73,9 +92,11 @@ class Board(Base):
     name = Column(String, unique=True, index=True)
     description = Column(String)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"))
+    updated_at = Column(DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow)
 
+    created_by_user_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User", back_populates="created_boards", foreign_keys=[created_by_user_id])
+
     favorited_by = relationship("User", secondary="users_favorite_boards_association", back_populates="favorite_boards")
     labels_filters = relationship("Label", secondary="boards_labels_filters_association", back_populates="boards_using_as_filter")
 
