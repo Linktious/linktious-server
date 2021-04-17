@@ -1,8 +1,12 @@
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, status
-from db import crud, schema
-from dependencies import get_db
+from db.schema import (
+    Team as TeamSchema,
+    TeamCreate as TeamCreateSchema
+)
+from db.managers import TeamObjectsManager
+from dependencies import get_objects_managers
 
 
 router = APIRouter(
@@ -11,11 +15,14 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schema.Team])
-def get_team(db: Session = Depends(get_db)):
-    return crud.get_teams(db=db)
+team_manager_dependency = Depends(get_objects_managers(TeamObjectsManager))
 
 
-@router.post("/", response_model=schema.Team, status_code=status.HTTP_201_CREATED)
-def create_team(team: schema.TeamCreate, db: Session = Depends(get_db)):
-    return crud.create_team(db=db, team=team)
+@router.get("/", response_model=List[TeamSchema])
+def get_team(team_manager: TeamObjectsManager = team_manager_dependency):
+    return team_manager.objects.all()
+
+
+@router.post("/", response_model=TeamSchema, status_code=status.HTTP_201_CREATED)
+def create_team(team: TeamCreateSchema, team_manager: TeamObjectsManager = team_manager_dependency):
+    return team_manager.objects.create(model_schema=team)
