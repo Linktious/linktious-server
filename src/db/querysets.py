@@ -29,7 +29,6 @@ class ModelQueryset(Generic[T_Model, T_SchemaCreate]):
         return self.filter(self.model.id.in_(ids))
 
     def create(self, model_schema: T_SchemaCreate) -> T_Model:
-        print(self.model, type(self.model))
         db_model = self.model(**model_schema.dict())
         return self.save(model=db_model)
 
