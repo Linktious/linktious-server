@@ -1,27 +1,27 @@
-from typing import Generic, TypeVar, Union, List
+from typing import Generic, TypeVar, Union, List, TYPE_CHECKING
 import datetime as dt
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Session, relationship, Query
 
-from .base import Base
-from . import models, schema
+if TYPE_CHECKING:
+    from .base import Base
+    from . import models, schema
+
+T_Model = TypeVar("T_Model", bound='Base')
+T_SchemaCreate = TypeVar("T_SchemaCreate", bound='schema.BaseModel')
+UserOrNone = Union['models.User', None]
+LinkOrNone = Union['models.Link', None]
+BoardOrNone = Union['models.Board', None]
 
 
-T_Model = TypeVar("T_Model", bound=Base)
-T_SchemaCreate = TypeVar("T_SchemaCreate", bound=schema.BaseModel)
-UserOrNone = Union[models.User, None]
-LinkOrNone = Union[models.Link, None]
-BoardOrNone = Union[models.Board, None]
-
-
-class ModelQueryset(Generic[T_Model, T_SchemaCreate]):
+class ModelManager(Generic[T_Model, T_SchemaCreate]):
 
     def __init__(self, db: Session, model: T_Model):
         self.db = db
         self.model = model
         self.queryset = self.db.query(self.model)
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Query:
         queryset = super().__getattribute__('queryset')
         return getattr(queryset, name)
 
@@ -40,23 +40,14 @@ class ModelQueryset(Generic[T_Model, T_SchemaCreate]):
         return model
 
 
-class TeamQueryset(ModelQueryset[models.Team, schema.TeamCreate]):
+class TeamManager(ModelManager['models.Team', 'schema.TeamCreate']):
     """Team Model Manager allow to extend ModelManager with
         methods that only relevant to Team model.
     """
     pass
 
 
-class TeamObjectsManager(models.Team):
-    __tablename__ = "teams"
-    __table_args__ = {'extend_existing': True} 
-
-    def __init__(self, db: Session, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objects = TeamQueryset(db=db, model=models.Team)
-
-
-class UserQueryset(ModelQueryset[models.User, schema.UserCreate]):
+class UserManager(ModelManager['models.User', 'schema.UserCreate']):
     """User Model Manager allow to extend ModelManager with
         methods that only relevant to User model.
     """
@@ -73,7 +64,7 @@ class UserQueryset(ModelQueryset[models.User, schema.UserCreate]):
         user.main_board_id = board_id
         return self.save(model=user)
     
-    def set_favorite_boards(self, id: int, boards: List[models.Board]) -> UserOrNone:
+    def set_favorite_boards(self, id: int, boards: List['models.Board']) -> UserOrNone:
         user = self.get(id)
         if user is None:
             return None
@@ -82,37 +73,20 @@ class UserQueryset(ModelQueryset[models.User, schema.UserCreate]):
         user.favorite_boards.extend(boards)
         return self.save(model=user)
 
-class UserObjectsManager(models.User):
-    __tablename__ = "users"
-    __table_args__ = {'extend_existing': True} 
 
-    def __init__(self, db, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objects = UserQueryset(db=db, model=models.User)
-
-
-class LabelQueryset(ModelQueryset[models.Label, schema.LabelCreate]):
+class LabelManager(ModelManager['models.Label', 'schema.LabelCreate']):
     """Label Model Manager allow to extend ModelManager with
         methods that only relevant to Label model.
     """
     pass
 
 
-class LabelObjectsManager(models.Label):
-    __tablename__ = "labels"
-    __table_args__ = {'extend_existing': True} 
-
-    def __init__(self, db, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objects = LabelQueryset(db=db, model=models.Label)
-
-
-class LinkQueryset(ModelQueryset[models.Link, schema.LinkCreate]):
+class LinkManager(ModelManager['models.Link', 'schema.LinkCreate']):
     """Link Model Manager allow to extend ModelManager with
         methods that only relevant to Link model.
     """
     
-    def set_labels(self, id: int, labels: List[models.Label]) -> LinkOrNone:
+    def set_labels(self, id: int, labels: List['models.Label']) -> LinkOrNone:
         link = self.get(id)
         if link is None:
             return None
@@ -122,21 +96,12 @@ class LinkQueryset(ModelQueryset[models.Link, schema.LinkCreate]):
         return self.save(model=link)
 
 
-class LinkObjectsManager(models.Link):
-    __tablename__ = "links"
-    __table_args__ = {'extend_existing': True} 
-
-    def __init__(self, db, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objects = LinkQueryset(db=db, model=models.Link)
-
-
-class BoardQueryset(ModelQueryset[models.Board, schema.BoardCreate]):
+class BoardManager(ModelManager['models.Board', 'schema.BoardCreate']):
     """Board Model Manager allow to extend ModelManager with
         methods that only relevant to Board model.
     """
     
-    def set_labels_filters(self, id: int, labels: List[models.Label]) -> BoardOrNone:
+    def set_labels_filters(self, id: int, labels: List['models.Label']) -> BoardOrNone:
         board = self.get(id)
         if board is None:
             return None
@@ -144,12 +109,3 @@ class BoardQueryset(ModelQueryset[models.Board, schema.BoardCreate]):
         board.labels_filters.clear()
         board.labels_filters.extend(labels)
         return self.save(model=board)
-
-
-class BoardObjectsManager(models.Board):
-    __tablename__ = "boards"
-    __table_args__ = {'extend_existing': True} 
-
-    def __init__(self, db, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objects = BoardQueryset(db=db, model=models.Board)

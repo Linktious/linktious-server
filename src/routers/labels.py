@@ -6,7 +6,8 @@ from db.schema import (
     Label as LabelSchema,
     LabelCreate as LabelCreateSchema
 )
-from db.managers import LabelObjectsManager
+from db.models import Label as LabelModel
+from db.base import ManagerProxy
 
 
 router = APIRouter(
@@ -15,19 +16,19 @@ router = APIRouter(
 )
 
 
-label_manager_dependency = Depends(get_objects_managers(LabelObjectsManager))
+label_manager_dependency = Depends(get_objects_managers(LabelModel))
 
 
 @router.get("/", response_model=List[LabelSchema])
-def get_labels(label_manager: LabelObjectsManager = label_manager_dependency):
+def get_labels(label_manager: ManagerProxy = label_manager_dependency):
     return label_manager.objects.all()
 
 
 @router.get("/{label_id}", response_model=LabelSchema)
-def get_label(label_id: int, label_manager: LabelObjectsManager = label_manager_dependency):
+def get_label(label_id: int, label_manager: ManagerProxy = label_manager_dependency):
     return label_manager.objects.get(label_id)
 
 
 @router.post("/", response_model=LabelSchema, status_code=status.HTTP_201_CREATED)
-def create_label(label: LabelCreateSchema, label_manager: LabelObjectsManager = label_manager_dependency):
+def create_label(label: LabelCreateSchema, label_manager: ManagerProxy = label_manager_dependency):
     return label_manager.objects.create(model_schema=label)

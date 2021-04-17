@@ -3,15 +3,17 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from .base import Base
+from . import managers
 
 
 class Team(Base):
     __tablename__ = "teams"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
 
     users = relationship("User", back_populates="team")
+
+    ObjectsManager = managers.TeamManager
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id} name: {self.name}>"
@@ -20,7 +22,6 @@ class Team(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
@@ -37,6 +38,7 @@ class User(Base):
     created_labels = relationship("Label", back_populates="created_by")
     favorite_boards = relationship("Board", secondary="users_favorite_boards_association", back_populates="favorited_by")
 
+    ObjectsManager = managers.UserManager
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id} email: {self.email}>"
@@ -45,7 +47,6 @@ class User(Base):
 class Link(Base):
     __tablename__ = "links"
 
-    id = Column(Integer, primary_key=True, index=True)
     icon_url = Column(String)
     url = Column(String)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
@@ -55,13 +56,14 @@ class Link(Base):
 
     labels = relationship("Label", secondary="links_labels_association", back_populates="links")
 
+    ObjectsManager = managers.LinkManager
+
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, created by: {self.created_by.email}>"
 
 class Label(Base):
     __tablename__ = "labels"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
 
@@ -70,6 +72,8 @@ class Label(Base):
 
     links = relationship("Link", secondary="links_labels_association", back_populates="labels")
     boards_using_as_filter = relationship("Board", secondary="boards_labels_filters_association", back_populates="labels_filters")
+
+    ObjectsManager = managers.LabelManager
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"
@@ -88,7 +92,6 @@ class LinkLabelAssociation(Base):
 class Board(Base):
     __tablename__ = "boards"
 
-    id = Column(Integer, primary_key=True, index=True)        
     name = Column(String, unique=True, index=True)
     description = Column(String)
     created_at = Column(DateTime, default=dt.datetime.utcnow)
@@ -99,6 +102,8 @@ class Board(Base):
 
     favorited_by = relationship("User", secondary="users_favorite_boards_association", back_populates="favorite_boards")
     labels_filters = relationship("Label", secondary="boards_labels_filters_association", back_populates="boards_using_as_filter")
+
+    ObjectsManager = managers.BoardManager
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"

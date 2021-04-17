@@ -1,12 +1,17 @@
-from typing import List, Union, Tuple
+from typing import List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, status
+
 from dependencies import get_objects_managers
 from db.schema import (
     User as UserSchema,
     UserBasicInfo as UserBasicInfoSchema
 )
-from db.managers import UserObjectsManager, BoardObjectsManager
+from db.models import (
+    User as UserModel, 
+    Board as BoardModel,
+)
+from db.base import ManagerProxy
 
 
 router = APIRouter(
@@ -15,14 +20,13 @@ router = APIRouter(
 )
 
 
-user_manager_dependency = Depends(get_objects_managers(UserObjectsManager))
-user_and_board_managers_dependency = Depends(get_objects_managers(UserObjectsManager, BoardObjectsManager))
-UserAndBoardManagers = Tuple[Union[UserObjectsManager, BoardObjectsManager]]
-
+user_manager_dependency = Depends(get_objects_managers(UserModel))
+user_and_board_managers_dependency = Depends(get_objects_managers(UserModel, BoardModel))
+UserAndBoardManagers = Tuple[ManagerProxy]
 
 
 @router.post("/login", response_model=UserSchema, responses={status.HTTP_401_UNAUTHORIZED: {"description": "Bad credentials"}})
-def login(user_email: str, user_password: str, user_manager: UserObjectsManager = user_manager_dependency):
+def login(user_email: str, user_password: str, user_manager: ManagerProxy = user_manager_dependency):
     user = user_manager.objects.authentication(email=user_email, password=user_password)
     if user is None:
         raise HTTPException(
@@ -33,7 +37,7 @@ def login(user_email: str, user_password: str, user_manager: UserObjectsManager 
 
 
 @router.get("/{user_id}", response_model=UserBasicInfoSchema)
-def get_user_basic_info_by_id(user_id: int, user_manager: UserObjectsManager = user_manager_dependency):
+def get_user_basic_info_by_id(user_id: int, user_manager: ManagerProxy = user_manager_dependency):
     user = user_manager.objects.get(user_id)
     if user is None:
         raise HTTPException(
@@ -44,7 +48,7 @@ def get_user_basic_info_by_id(user_id: int, user_manager: UserObjectsManager = u
 
 
 @router.put("/{user_id}/set_main_board", response_model=UserSchema)
-def set_user_main_board(user_id: int, board_id: int, user_manager: UserObjectsManager = user_manager_dependency):
+def set_user_main_board(user_id: int, board_id: int, user_manager: ManagerProxy = user_manager_dependency):
     user = user_manager.objects.set_main_board(id=user_id, board_id=board_id)
     if user is None:
         raise HTTPException(

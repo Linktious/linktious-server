@@ -1,7 +1,7 @@
 from typing import Union, List
 from contextlib import contextmanager
 from sqlalchemy.orm import Session
-from db import base, managers
+from db import base
 
 
 @contextmanager
@@ -12,32 +12,26 @@ def db_session() -> Session:
     finally:
         db.close()
 
-ModelManagers = Union[
-    managers.TeamObjectsManager,
-    managers.UserObjectsManager,
-    managers.LabelObjectsManager,
-    managers.LinkObjectsManager,
-    managers.BoardObjectsManager,
-]
 
-
-def get_objects_managers(*managers: ModelManagers) -> Union[ModelManagers, List[ModelManagers]]:
-    """Get models objects managers as dpendencies.
+def get_objects_managers(*models: base.Base) -> Union[base.ManagerProxy, List[base.ManagerProxy]]:
+    """Get models objects managers as dependencies.
     
     Args:
-        *managers(ModelManagers): class reference for model manager
+        *managers(base.Base): class reference for models
 
     Returns:
-        list. instances of model objects managers initialized with same db connection 
+        list. instances of ManagerProxy initialized with same db connection 
               if requested more than one manager.
-        ModelManagers. instance of model object manager initialized with db connection
+        ManagerProxy. instance of model object manager initialized with db connection
                        if requested one manager.
 
     Usage example:
         team_manager, user_manager = fastapi.Depends(get_objects_managers(managers.TeamObjectsManager, managers.UserObjectsManager))
+        team_manager.objects.all()
+        user_manager.objects.create(schema.UserCreate(email="email@gmail.com", hashed_password="123456"))
     """
     def inner():
         with db_session() as db:
-            managers_instances = tuple(manager(db) for manager in managers)
+            managers_instances = tuple(model.get_objects_manager(db) for model in models)
             yield managers_instances[0] if len(managers_instances) == 1 else managers_instances
     return inner
