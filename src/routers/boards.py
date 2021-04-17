@@ -2,7 +2,7 @@ from typing import List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, status
 from dependencies import models_manager_dependency
-from db.querysets import ModelsManager
+from db.models import ModelsManager
 from db.schema import (
     Board as BoardSchema,
     BoardCreate as BoardCreateSchema

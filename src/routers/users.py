@@ -7,7 +7,7 @@ from db.schema import (
     User as UserSchema,
     UserBasicInfo as UserBasicInfoSchema
 )
-from db.querysets import ModelsManager
+from db.models import ModelsManager
 
 
 router = APIRouter(

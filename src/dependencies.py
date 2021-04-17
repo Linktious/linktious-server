@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from db import base
-from db.querysets import ModelsManager
+from db.models import ModelsManager
 
 
 @contextmanager

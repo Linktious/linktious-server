@@ -1,6 +1,6 @@
 import datetime as dt
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 
 from .base import Base
 from . import querysets
@@ -127,3 +127,45 @@ class BoardLabelsFilterAssociation(Base):
 
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
     label_id = Column(Integer, ForeignKey("labels.id"), primary_key=True)
+
+
+table_name_to_model = {
+    model.__tablename__: model
+    for model in Base.__subclasses__()
+}
+
+
+class ModelsManager:
+    """Models Manager for models.
+    
+    Models manager lets you use the same db session to query different model using their querysets.
+    To use model queryset use the table name.
+
+    Usage Example:
+        models_manager = ModelsManager(db=db)
+        teams = models_manager.teams.all()
+        user = models_manager.users.create(model_schema=schema.UserCreate(username="user", hashed_password=12345678))
+    """
+
+    # Add models with queryset in here for better type hints
+    teams: Team.ObjectsQueryset
+    users: User.ObjectsQueryset
+    links: Link.ObjectsQueryset
+    labels: Label.ObjectsQueryset
+    boards: Board.ObjectsQueryset
+    
+    def __init__(self, db: Session):
+        self.db = db
+
+    def __getattribute__(self, name):
+        """Get attribute
+        
+        Checks first if requested attribute is model queryset and if so initialize
+        instance of the relevant model queryset with the db session.
+        """
+        model = table_name_to_model.get(name)
+        if model is None:
+            # Default behaviour
+            return super().__getattribute__(name)
+        
+        return model.get_objects_queryset(db=self.db)

@@ -7,7 +7,7 @@ from db.schema import (
     Team as TeamSchema,
     TeamCreate as TeamCreateSchema
 )
-from db.querysets import ModelsManager
+from db.models import ModelsManager
 
 
 router = APIRouter(

@@ -6,7 +6,7 @@ from db.schema import (
     Link as LinkSchema,
     LinkCreate as LinkCreateSchema
 )
-from db.querysets import ModelsManager
+from db.models import ModelsManager
 
 
 router = APIRouter(
