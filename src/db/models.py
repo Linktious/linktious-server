@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from .base import Base
-from . import managers
+from . import querysets
 
 
 class Team(Base):
@@ -13,7 +13,7 @@ class Team(Base):
 
     users = relationship("User", back_populates="team")
 
-    ObjectsManager = managers.TeamManager
+    ObjectsQueryset = querysets.TeamQueryset
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id} name: {self.name}>"
@@ -38,7 +38,7 @@ class User(Base):
     created_labels = relationship("Label", back_populates="created_by")
     favorite_boards = relationship("Board", secondary="users_favorite_boards_association", back_populates="favorited_by")
 
-    ObjectsManager = managers.UserManager
+    ObjectsQueryset = querysets.UserQueryset
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id} email: {self.email}>"
@@ -56,7 +56,7 @@ class Link(Base):
 
     labels = relationship("Label", secondary="links_labels_association", back_populates="links")
 
-    ObjectsManager = managers.LinkManager
+    ObjectsQueryset = querysets.LinkQueryset
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, created by: {self.created_by.email}>"
@@ -73,7 +73,7 @@ class Label(Base):
     links = relationship("Link", secondary="links_labels_association", back_populates="labels")
     boards_using_as_filter = relationship("Board", secondary="boards_labels_filters_association", back_populates="labels_filters")
 
-    ObjectsManager = managers.LabelManager
+    ObjectsQueryset = querysets.LabelQueryset
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"
@@ -103,7 +103,7 @@ class Board(Base):
     favorited_by = relationship("User", secondary="users_favorite_boards_association", back_populates="favorite_boards")
     labels_filters = relationship("Label", secondary="boards_labels_filters_association", back_populates="boards_using_as_filter")
 
-    ObjectsManager = managers.BoardManager
+    ObjectsQueryset = querysets.BoardQueryset
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id: {self.id}, name: {self.name}, created by: {self.created_by.email}>"

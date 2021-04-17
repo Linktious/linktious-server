@@ -1,13 +1,12 @@
 from typing import List
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, status
-from dependencies import get_objects_managers
+from fastapi import APIRouter, status
+from dependencies import models_manager_dependency
+from db.querysets import ModelsManager
 from db.schema import (
     Label as LabelSchema,
     LabelCreate as LabelCreateSchema
 )
-from db.models import Label as LabelModel
-from db.managers import LabelManager
 
 
 router = APIRouter(
@@ -16,19 +15,16 @@ router = APIRouter(
 )
 
 
-label_manager_dependency = Depends(get_objects_managers(LabelModel))
-
-
 @router.get("/", response_model=List[LabelSchema])
-def get_labels(label_manager: LabelManager = label_manager_dependency):
-    return label_manager.all()
+def get_labels(models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.labels.all()
 
 
 @router.get("/{label_id}", response_model=LabelSchema)
-def get_label(label_id: int, label_manager: LabelManager = label_manager_dependency):
-    return label_manager.get(label_id)
+def get_label(label_id: int, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.labels.get(label_id)
 
 
 @router.post("/", response_model=LabelSchema, status_code=status.HTTP_201_CREATED)
-def create_label(label: LabelCreateSchema, label_manager: LabelManager = label_manager_dependency):
-    return label_manager.create(model_schema=label)
+def create_label(label: LabelCreateSchema, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.labels.create(model_schema=label)

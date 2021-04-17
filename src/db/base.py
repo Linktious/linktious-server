@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import Column, Integer
 
-from .managers import ModelManager
+from .querysets import ModelQueryset
 
 
 SQLALCHEMY_DATABASE_URL = os.getenv("LINKTIOUS_DATABASE_URL", "sqlite:///./linktious.db")
@@ -21,8 +21,8 @@ class Base:
 
     id = Column(Integer, primary_key=True, index=True)
 
-    ObjectsManager: ModelManager = NotImplemented
+    ObjectsQueryset: ModelQueryset = NotImplemented
 
     @classmethod
-    def get_objects_manager(cls, db: Session) -> ModelManager:
-        return cls.ObjectsManager(db=db, model=cls)
+    def get_objects_queryset(cls, db: Session) -> ModelQueryset:
+        return cls.ObjectsQueryset(db=db, model=cls)

@@ -14,8 +14,8 @@ LinkOrNone = Union['models.Link', None]
 BoardOrNone = Union['models.Board', None]
 
 
-class ModelManager(Generic[T_Model, T_SchemaCreate]):
-
+class ModelQueryset(Generic[T_Model, T_SchemaCreate]):
+    """Model queryset to extend sqlalchemy queryset functionality."""
     def __init__(self, db: Session, model: T_Model):
         self.db = db
         self.model = model
@@ -40,15 +40,15 @@ class ModelManager(Generic[T_Model, T_SchemaCreate]):
         return model
 
 
-class TeamManager(ModelManager['models.Team', 'schema.TeamCreate']):
-    """Team Model Manager allow to extend ModelManager with
+class TeamQueryset(ModelQueryset['models.Team', 'schema.TeamCreate']):
+    """Team model queryset allow to extend ModelQueryset with
         methods that only relevant to Team model.
     """
     pass
 
 
-class UserManager(ModelManager['models.User', 'schema.UserCreate']):
-    """User Model Manager allow to extend ModelManager with
+class UserQueryset(ModelQueryset['models.User', 'schema.UserCreate']):
+    """User model queryset allow to extend ModelQueryset with
         methods that only relevant to User model.
     """
     
@@ -74,15 +74,15 @@ class UserManager(ModelManager['models.User', 'schema.UserCreate']):
         return self.save(model=user)
 
 
-class LabelManager(ModelManager['models.Label', 'schema.LabelCreate']):
-    """Label Model Manager allow to extend ModelManager with
+class LabelQueryset(ModelQueryset['models.Label', 'schema.LabelCreate']):
+    """Label model queryset allow to extend ModelQueryset with
         methods that only relevant to Label model.
     """
     pass
 
 
-class LinkManager(ModelManager['models.Link', 'schema.LinkCreate']):
-    """Link Model Manager allow to extend ModelManager with
+class LinkQueryset(ModelQueryset['models.Link', 'schema.LinkCreate']):
+    """Link model queryset allow to extend ModelQueryset with
         methods that only relevant to Link model.
     """
     
@@ -96,8 +96,8 @@ class LinkManager(ModelManager['models.Link', 'schema.LinkCreate']):
         return self.save(model=link)
 
 
-class BoardManager(ModelManager['models.Board', 'schema.BoardCreate']):
-    """Board Model Manager allow to extend ModelManager with
+class BoardQueryset(ModelQueryset['models.Board', 'schema.BoardCreate']):
+    """Board model queryset allow to extend ModelQueryset with
         methods that only relevant to Board model.
     """
     
@@ -109,3 +109,45 @@ class BoardManager(ModelManager['models.Board', 'schema.BoardCreate']):
         board.labels_filters.clear()
         board.labels_filters.extend(labels)
         return self.save(model=board)
+
+
+class ModelsManager:
+    """Models Manager for models.
+    
+    Models manager lets you use the same db session to query different model using their querysets.
+
+    Usage Example"
+        models_manager = ModelsManager(db=db)
+        teams = models_manager.teams.all()
+        user = models_manager.users.create(model_schema=schema.UserCreate(username="user", hashed_password=12345678))
+    """
+
+    teams: TeamQueryset
+    users: UserQueryset
+    links: LinkQueryset
+    labels: LabelQueryset
+    boards: BoardQueryset
+    
+    def __init__(self, db: Session):
+        self.db = db
+
+    def __getattribute__(self, name):
+        """Get attribute
+        
+        Checks first if requested attribute is model queryset and if so initialize
+        instance of the relevant model queryset with the db session.
+        """
+        from . import models
+        property_to_model = {
+            "teams": models.Team,
+            "users": models.User,
+            "links": models.Link,
+            "labels": models.Label,
+            "boards": models.Board,
+        }
+        model = property_to_model.get(name)
+        if model is None:
+            # Default behaviour
+            return super().__getattribute__(name)
+        
+        return model.get_objects_queryset(db=self.db)
