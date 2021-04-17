@@ -24,10 +24,5 @@ class Base:
     ObjectsManager: ModelManager = NotImplemented
 
     @classmethod
-    def get_objects_manager(cls, db: Session) -> 'ManagerProxy':
-        return ManagerProxy(db=db, model=cls, models_manager=cls.ObjectsManager)
-
-
-class ManagerProxy:
-    def __init__(self, db: Session, model: Base, models_manager: ModelManager):
-        self.objects = models_manager(db=db, model=model)
+    def get_objects_manager(cls, db: Session) -> ModelManager:
+        return cls.ObjectsManager(db=db, model=cls)
