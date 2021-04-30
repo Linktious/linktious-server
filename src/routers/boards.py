@@ -1,5 +1,4 @@
-from typing import List, Tuple
-from sqlalchemy.orm import Session
+from typing import List
 from fastapi import APIRouter, status
 from dependencies import models_manager_dependency
 from db.models import ModelsManager
@@ -33,4 +32,4 @@ def create_board(board: BoardCreateSchema, models_manager: ModelsManager = model
 @router.post("/{board_id}/set_labels_filters", response_model=BoardSchema)
 def set_board_labels_filters(board_id: int, labels_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
     labels = models_manager.labels.filter_by_ids(ids=labels_ids)
-    return models_manager.boards.set_labels_filters(id=board_id, labels=labels)
+    return models_manager.boards.set_labels_filters(board_id=board_id, labels=labels)

@@ -2,7 +2,8 @@ from db.base import *
 from db import models, schema
 
 models.Base.metadata.create_all(bind=engine)
-ses =  SessionLocal()
+ses = SessionLocal()
+
 
 def generate_db():
     Base.metadata.drop_all(bind=engine)
@@ -38,6 +39,7 @@ def generate_db():
     link3.labels.append(label1)
     link3.labels.append(label2)
     link3.labels.append(label3)
+    ses.commit()
 
     board1 = models.Board(name="board1", description="my cool board", created_by_user_id=user1.id)
     add(board1)
@@ -47,6 +49,7 @@ def generate_db():
 
     board1.labels_filters.append(label2)
     ses.commit()
+
 
 generate_db()
 

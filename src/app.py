@@ -1,6 +1,5 @@
 import uvicorn
 from fastapi import FastAPI, status
-from sqlalchemy.orm import Session
 
 from db import base
 from routers import (

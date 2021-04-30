@@ -1,5 +1,4 @@
 from typing import List
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, status
 
 from dependencies import models_manager_dependency

@@ -1,7 +1,5 @@
 from typing import Generic, TypeVar, Union, List, TYPE_CHECKING
-import datetime as dt
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import Session, relationship, Query
+from sqlalchemy.orm import Session, Query
 
 if TYPE_CHECKING:
     from .base import Base
@@ -51,20 +49,20 @@ class UserQueryset(ModelQueryset['models.User', 'schema.UserCreate']):
         methods that only relevant to User model.
     """
     
-    # This method is temporary untill we add real authentication method
+    # This method is temporary until we add real authentication method
     def authentication(self, email: str, password: str) -> UserOrNone:
         return self.filter_by(email=email, hashed_password=password).one_or_none()
 
-    def set_main_board(self, id: int, board_id) -> UserOrNone:
-        user = self.get(id)
+    def set_main_board(self, user_id: int, board_id) -> UserOrNone:
+        user = self.get(user_id)
         if user is None:
             return None
 
         user.main_board_id = board_id
         return self.save(model=user)
     
-    def set_favorite_boards(self, id: int, boards: List['models.Board']) -> UserOrNone:
-        user = self.get(id)
+    def set_favorite_boards(self, user_id: int, boards: List['models.Board']) -> UserOrNone:
+        user = self.get(user_id)
         if user is None:
             return None
         
@@ -85,8 +83,8 @@ class LinkQueryset(ModelQueryset['models.Link', 'schema.LinkCreate']):
         methods that only relevant to Link model.
     """
     
-    def set_labels(self, id: int, labels: List['models.Label']) -> LinkOrNone:
-        link = self.get(id)
+    def set_labels(self, link_id: int, labels: List['models.Label']) -> LinkOrNone:
+        link = self.get(link_id)
         if link is None:
             return None
 
@@ -100,8 +98,8 @@ class BoardQueryset(ModelQueryset['models.Board', 'schema.BoardCreate']):
         methods that only relevant to Board model.
     """
     
-    def set_labels_filters(self, id: int, labels: List['models.Label']) -> BoardOrNone:
-        board = self.get(id)
+    def set_labels_filters(self, board_id: int, labels: List['models.Label']) -> BoardOrNone:
+        board = self.get(board_id)
         if board is None:
             return None
 

@@ -1,5 +1,5 @@
-from typing import Optional, List, Union
-import datetime as dt
+from typing import List
+from datetime import datetime
 from pydantic import BaseModel, validator, HttpUrl, EmailStr
 
 
@@ -55,7 +55,7 @@ class User(UserBasicInfo):
 
 class LabelBase(BaseModel):
     name: str
-    created_at: dt.datetime
+    created_at: datetime
     created_by_user_id: int
 
 
@@ -75,7 +75,7 @@ class Label(LabelBase):
 class LinkBase(BaseModel):
     icon_url: HttpUrl
     url: HttpUrl
-    created_at: dt.datetime
+    created_at: datetime
     created_by_user_id: int
 
 
@@ -89,7 +89,6 @@ class Link(LinkBase):
     id: int
     labels: List[int] = []
 
-    
     @validator("labels", pre=True)
     def labels_ids(cls, labels):
         return (label.id for label in labels)
@@ -101,8 +100,8 @@ class Link(LinkBase):
 class BoardBase(BaseModel):
     name: str
     description: str
-    created_at: dt.datetime
-    updated_at: dt.datetime
+    created_at: datetime
+    updated_at: datetime
     created_by_user_id: int
 
 
@@ -116,6 +115,7 @@ class Board(BoardBase):
     id: int
     labels_filters: List[int] = []
 
+    @classmethod
     @validator("labels_filters", pre=True)
     def labels_ids(cls, labels):
         return (label.id for label in labels)

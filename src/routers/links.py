@@ -1,5 +1,4 @@
-from typing import List, Tuple
-from sqlalchemy.orm import Session
+from typing import List
 from fastapi import APIRouter, status
 from dependencies import models_manager_dependency
 from db.schema import (
@@ -33,4 +32,4 @@ def create_link(link: LinkCreateSchema, models_manager: ModelsManager = models_m
 @router.post("/{link_id}/set_labels", response_model=LinkSchema)
 def set_link_labels(link_id: int, labels_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
     labels = models_manager.labels.filter_by_ids(ids=labels_ids)
-    return models_manager.links.set_labels(id=link_id, labels=labels)
+    return models_manager.links.set_labels(link_id=link_id, labels=labels)
