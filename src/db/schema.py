@@ -20,6 +20,11 @@ class Team(TeamBase):
         orm_mode = True
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+    
+
 class UserBase(BaseModel):
     name: str
     email: EmailStr

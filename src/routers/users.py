@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException, status
 from dependencies import models_manager_dependency
 from db.schema import (
     User as UserSchema,
-    UserBasicInfo as UserBasicInfoSchema
+    UserLogin as UserLoginSchema,
+    UserBasicInfo as UserBasicInfoSchema,
 )
 from db.models import ModelsManager
 
@@ -16,8 +17,8 @@ router = APIRouter(
 
 
 @router.post("/login", response_model=UserSchema, responses={status.HTTP_401_UNAUTHORIZED: {"description": "Bad credentials"}})
-def login(user_email: str, user_password: str, models_manager: ModelsManager = models_manager_dependency):
-    user = models_manager.users.authentication(email=user_email, password=user_password)
+def login(user: UserLoginSchema, models_manager: ModelsManager = models_manager_dependency):
+    user = models_manager.users.authentication(email=user.email, password=user.password)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
