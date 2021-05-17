@@ -1,10 +1,7 @@
-from typing import List
 import uvicorn
-from fastapi import FastAPI, Depends, status
-from sqlalchemy.orm import Session
+from fastapi import FastAPI, status
 
-from db import base, models, schema, crud
-from dependencies import get_db
+from db import base
 from routers import (
     users,
     teams,
@@ -13,7 +10,7 @@ from routers import (
     boards,
 ) 
 
-models.Base.metadata.create_all(bind=base.engine)
+base.Base.metadata.create_all(bind=base.engine)
 
 DEBUG = True
 DEV = 'DEV'

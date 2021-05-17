@@ -1,8 +1,11 @@
 from typing import List
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, status
-from db import crud, schema
-from dependencies import get_db
+from fastapi import APIRouter, status
+from dependencies import models_manager_dependency
+from db.schema import (
+    Link as LinkSchema,
+    LinkCreate as LinkCreateSchema
+)
+from db.models import ModelsManager
 
 
 router = APIRouter(
@@ -11,16 +14,22 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schema.Link])
-def get_links(db: Session = Depends(get_db)):
-    return crud.get_links(db=db)
+@router.get("/", response_model=List[LinkSchema])
+def get_links(models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.links.all()
 
 
-@router.post("/", response_model=schema.Link, status_code=status.HTTP_201_CREATED)
-def create_link(link: schema.LinkCreate, db: Session = Depends(get_db)):
-    return crud.create_link(db=db, link=link)
+@router.get("/{link_id}", response_model=LinkSchema)
+def get_link(link_id: int, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.links.get(link_id)
 
 
-@router.post("/{link_id}/set_labels", response_model=schema.Link)
-def set_link_labels(link_id: int, labels_ids: List[int], db: Session = Depends(get_db)):
-    return crud.set_link_labels(db=db, link_id=link_id, labels_ids=labels_ids)
+@router.post("/", response_model=LinkSchema, status_code=status.HTTP_201_CREATED)
+def create_link(link: LinkCreateSchema, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.links.create(model_schema=link)
+
+
+@router.post("/{link_id}/set_labels", response_model=LinkSchema)
+def set_link_labels(link_id: int, labels_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
+    labels = models_manager.labels.filter_by_ids(ids=labels_ids)
+    return models_manager.links.set_labels(link_id=link_id, labels=labels)

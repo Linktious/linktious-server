@@ -1,8 +1,14 @@
 from typing import List
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, status
-from dependencies import get_db
-from db import crud, schema
+from fastapi import APIRouter, HTTPException, status
+
+from dependencies import models_manager_dependency
+from db.schema import (
+    User as UserSchema,
+    UserLogin as UserLoginSchema,
+    UserBasicInfo as UserBasicInfoSchema,
+)
+from db.models import ModelsManager
+
 
 router = APIRouter(
     prefix="/users",
@@ -10,9 +16,9 @@ router = APIRouter(
 )
 
 
-@router.post("/login", response_model=schema.User, responses={status.HTTP_401_UNAUTHORIZED: {"description": "Bad credentials"}})
-def login(user_email: str, user_password: str, db: Session = Depends(get_db)):
-    user = crud.user_authentication(db=db, user_email=user_email, user_password=user_password)
+@router.post("/login", response_model=UserSchema, responses={status.HTTP_401_UNAUTHORIZED: {"description": "Bad credentials"}})
+def login(user: UserLoginSchema, models_manager: ModelsManager = models_manager_dependency):
+    user = models_manager.users.authentication(email=user.email, password=user.password)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -21,9 +27,9 @@ def login(user_email: str, user_password: str, db: Session = Depends(get_db)):
     return user
 
 
-@router.get("/{user_id}", response_model=schema.UserBasicInfo)
-def get_user_basic_info_by_id(user_id: int, db: Session = Depends(get_db)):
-    user = crud.get_user_by_id(db=db, user_id=user_id)
+@router.get("/{user_id}", response_model=UserBasicInfoSchema)
+def get_user_basic_info_by_id(user_id: int, models_manager: ModelsManager = models_manager_dependency):
+    user = models_manager.users.get(user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -32,9 +38,9 @@ def get_user_basic_info_by_id(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.put("/{user_id}/set_main_board", response_model=schema.User)
-def set_user_main_board(user_id: int, board_id: int, db: Session = Depends(get_db)):
-    user = crud.set_user_main_board(db=db, user_id=user_id, board_id=board_id)
+@router.put("/{user_id}/set_main_board", response_model=UserSchema)
+def set_user_main_board(user_id: int, board_id: int, models_manager: ModelsManager = models_manager_dependency):
+    user = models_manager.users.set_main_board(user_id=user_id, board_id=board_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -43,10 +49,10 @@ def set_user_main_board(user_id: int, board_id: int, db: Session = Depends(get_d
     return user
 
 
-
-@router.put("/{user_id}/set_favorite_boards", response_model=schema.User)
-def set_user_favorite_boards(user_id: int, boards_ids: List[int], db: Session = Depends(get_db)):
-    user = crud.set_user_favorite_boards(db=db, user_id=user_id, boards_ids=boards_ids)
+@router.put("/{user_id}/set_favorite_boards", response_model=UserSchema)
+def set_user_favorite_boards(user_id: int, boards_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
+    boards = models_manager.boards.filter_by_ids(ids=boards_ids)
+    user = models_manager.users.set_favorite_boards(user_id=user_id, boards=boards)
     if user is None:
         raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

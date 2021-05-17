@@ -1,8 +1,11 @@
 from typing import List
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, status
-from db import crud, schema
-from dependencies import get_db
+from fastapi import APIRouter, status
+from dependencies import models_manager_dependency
+from db.models import ModelsManager
+from db.schema import (
+    Board as BoardSchema,
+    BoardCreate as BoardCreateSchema
+)
 
 
 router = APIRouter(
@@ -11,16 +14,22 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schema.Board])
-def get_boards(db: Session = Depends(get_db)):
-    return crud.get_boards(db=db)
+@router.get("/", response_model=List[BoardSchema])
+def get_boards(models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.boards.all()
 
 
-@router.post("/", response_model=schema.Board, status_code=status.HTTP_201_CREATED)
-def create_board(board: schema.BoardCreate, db: Session = Depends(get_db)):
-    return crud.create_board(db=db, board=board)
+@router.get("/{board_id}", response_model=BoardSchema)
+def get_board(board_id: int, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.boards.get(board_id)
 
 
-@router.post("/{board_id}/set_labels_filters", response_model=schema.Board)
-def set_board_labels_filters(board_id: int, labels_ids: List[int], db: Session = Depends(get_db)):
-    return crud.set_board_labels_filters(db=db, board_id=board_id, labels_ids=labels_ids)
+@router.post("/", response_model=BoardSchema, status_code=status.HTTP_201_CREATED)
+def create_board(board: BoardCreateSchema, models_manager: ModelsManager = models_manager_dependency):
+    return models_manager.boards.create(model_schema=board)
+
+
+@router.post("/{board_id}/set_labels_filters", response_model=BoardSchema)
+def set_board_labels_filters(board_id: int, labels_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
+    labels = models_manager.labels.filter_by_ids(ids=labels_ids)
+    return models_manager.boards.set_labels_filters(board_id=board_id, labels=labels)
