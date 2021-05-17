@@ -22,9 +22,9 @@ def generate_db():
     user1 = models.User(name="Asaf", email="user@email.com", hashed_password="12345678", team_id=team1.id)
     add(user1)
 
-    link1 = models.Link(icon_url="http://www.icon1.com", url="http://url1.com", created_by_user_id=user1.id)
-    link2 = models.Link(icon_url="http://www.icon2.com", url="http://url1.com", created_by_user_id=user1.id)
-    link3 = models.Link(icon_url="http://www.icon3.com", url="http://url1.com", created_by_user_id=user1.id)
+    link1 = models.Link(icon_url="http://www.icon1.com", url="http://url1.com", description="link1", created_by_user_id=user1.id)
+    link2 = models.Link(icon_url="http://www.icon2.com", url="http://url1.com", description="link2", created_by_user_id=user1.id)
+    link3 = models.Link(icon_url="http://www.icon3.com", url="http://url1.com", description="link3", created_by_user_id=user1.id)
     add(link1, link2, link3)
 
     label1 = models.Label(name="label1", created_by_user_id=user1.id)

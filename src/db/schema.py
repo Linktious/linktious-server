@@ -80,6 +80,7 @@ class Label(LabelBase):
 class LinkBase(BaseModel):
     icon_url: HttpUrl
     url: HttpUrl
+    description: str
     created_at: datetime
     created_by_user_id: int
 

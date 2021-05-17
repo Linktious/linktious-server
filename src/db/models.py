@@ -53,6 +53,7 @@ class Link(Base):
     id = Column(Integer, primary_key=True, index=True)
     icon_url = Column(String)
     url = Column(String)
+    description = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     created_by_user_id = Column(Integer, ForeignKey("users.id"))
@@ -63,7 +64,7 @@ class Link(Base):
     ObjectsQueryset = querysets.LinkQueryset
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} id: {self.id}, created by: {self.created_by.email}>"
+        return f"<{self.__class__.__name__} id: {self.id}, description: {self.description}, created by: {self.created_by.email}>"
 
 
 class Label(Base):
