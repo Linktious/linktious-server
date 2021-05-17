@@ -120,7 +120,6 @@ class Board(BoardBase):
     id: int
     labels_filters: List[int] = []
 
-    @classmethod
     @validator("labels_filters", pre=True)
     def labels_ids(cls, labels):
         return (label.id for label in labels)
