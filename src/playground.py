@@ -1,5 +1,5 @@
 from db.base import *
-from db import models, schema
+from db import models
 
 models.Base.metadata.create_all(bind=engine)
 ses = SessionLocal()
@@ -30,7 +30,10 @@ def generate_db():
     label1 = models.Label(name="Python", created_by_user_id=user1.id)
     label2 = models.Label(name="Documentations", created_by_user_id=user1.id)
     label3 = models.Label(name="Redis", created_by_user_id=user1.id)
-    add(label1, label2, label3)
+    label4 = models.Label(name="Tutorials", created_by_user_id=user1.id)
+    label5 = models.Label(name="Challenges", created_by_user_id=user1.id)
+    label6 = models.Label(name="How to Articles", created_by_user_id=user1.id)
+    add(label1, label2, label3, label4, label5, label6)
 
     link1.labels.append(label1)
     link1.labels.append(label2)
@@ -40,13 +43,15 @@ def generate_db():
     link3.labels.append(label3)
     ses.commit()
 
-    board1 = models.Board(name="board1", description="my cool board", created_by_user_id=user1.id)
+    board1 = models.Board(name="Documentations", description="my cool board", created_by_user_id=user1.id)
     add(board1)
 
     user1.favorite_boards.append(board1)
     user1.main_board_id = board1.id
 
-    board1.labels_filters.append(label2)
+    board1.links.append(link1)
+    board1.links.append(link2)
+    board1.links.append(link3)
     ses.commit()
 
 

@@ -98,11 +98,11 @@ class BoardQueryset(ModelQueryset['models.Board', 'schema.BoardCreate']):
         methods that only relevant to Board model.
     """
     
-    def set_labels_filters(self, board_id: int, labels: List['models.Label']) -> BoardOrNone:
+    def set_links(self, board_id: int, links: List['models.Link']) -> BoardOrNone:
         board = self.get(board_id)
         if board is None:
             return None
 
-        board.labels_filters.clear()
-        board.labels_filters.extend(labels)
+        board.links.clear()
+        board.links.extend(links)
         return self.save(model=board)

@@ -29,7 +29,7 @@ def create_board(board: BoardCreateSchema, models_manager: ModelsManager = model
     return models_manager.boards.create(model_schema=board)
 
 
-@router.post("/{board_id}/set_labels_filters", response_model=BoardSchema)
-def set_board_labels_filters(board_id: int, labels_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
-    labels = models_manager.labels.filter_by_ids(ids=labels_ids)
-    return models_manager.boards.set_labels_filters(board_id=board_id, labels=labels)
+@router.post("/{board_id}/set_links", response_model=BoardSchema)
+def set_board_links(board_id: int, links_ids: List[int], models_manager: ModelsManager = models_manager_dependency):
+    links = models_manager.links.filter_by_ids(ids=links_ids)
+    return models_manager.boards.set_links(board_id=board_id, links=links)

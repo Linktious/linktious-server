@@ -119,11 +119,11 @@ class BoardCreate(BoardBase):
 
 class Board(BoardBase):
     id: int
-    labels_filters: List[int] = []
+    links: List[int] = []
 
-    @validator("labels_filters", pre=True)
-    def labels_ids(cls, labels):
-        return (label.id for label in labels)
+    @validator("links", pre=True)
+    def links_ids(cls, links):
+        return (link.id for link in links)
 
     class Config:
         orm_mode = True
