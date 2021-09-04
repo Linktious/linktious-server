@@ -1,4 +1,3 @@
-from typing import Union
 from datetime import datetime
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship, Session
@@ -60,6 +59,7 @@ class Link(Base):
     created_by = relationship("User", back_populates="created_links")
 
     labels = relationship("Label", secondary="links_labels_association", back_populates="links")
+    boards = relationship("Board", secondary="boards_links_association", back_populates="links")
 
     ObjectsQueryset = querysets.LinkQueryset
 
@@ -78,7 +78,6 @@ class Label(Base):
     created_by = relationship("User", back_populates="created_labels")
 
     links = relationship("Link", secondary="links_labels_association", back_populates="labels")
-    boards_using_as_filter = relationship("Board", secondary="boards_labels_filters_association", back_populates="labels_filters")
 
     ObjectsQueryset = querysets.LabelQueryset
 
@@ -109,7 +108,7 @@ class Board(Base):
     created_by = relationship("User", back_populates="created_boards", foreign_keys=[created_by_user_id])
 
     favorite_by = relationship("User", secondary="users_favorite_boards_association", back_populates="favorite_boards")
-    labels_filters = relationship("Label", secondary="boards_labels_filters_association", back_populates="boards_using_as_filter")
+    links = relationship("Link", secondary="boards_links_association", back_populates="boards")
 
     ObjectsQueryset = querysets.BoardQueryset
 
@@ -127,14 +126,14 @@ class UserFavoriteBoardsAssociation(Base):
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
 
 
-class BoardLabelsFilterAssociation(Base):
-    """Many to many relationship between boards and labels that will be used
-        to filter links for board by the labels associated to board.
+class BoardLinksAssociation(Base):
+    """Many to many relationship between boards and links that will be used
+        to filter links for board by links associated to board.
     """
-    __tablename__ = "boards_labels_filters_association"
+    __tablename__ = "boards_links_association"
 
     board_id = Column(Integer, ForeignKey("boards.id"), primary_key=True)
-    label_id = Column(Integer, ForeignKey("labels.id"), primary_key=True)
+    link_id = Column(Integer, ForeignKey("links.id"), primary_key=True)
 
 
 class ModelsManager:
